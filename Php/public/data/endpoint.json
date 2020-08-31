@@ -1,0 +1,43 @@
+[
+  {
+    "metadata": "dashboard",
+    "development": "http://localhost:3000/api/dashboard",
+    "production": ""
+  },
+  {
+    "metadata": "option",
+    "development": "http://localhost:3000/api/option",
+    "production": ""
+  },
+  {
+    "metadata": "task",
+    "development": "http://localhost:3000/api/task",
+    "production": ""
+  },
+  {
+    "metadata": "taskList",
+    "development": "http://localhost:3000/api/taskList",
+    "production": ""
+  },
+  {
+    "metadata": "expense",
+    "development": "http://localhost:3000/api/expense",
+    "production": ""
+  },
+
+  {
+    "metadata": "report",
+    "development": "http://localhost:3000/api/report",
+    "production": ""
+  },
+  {
+    "metadata": "event",
+    "development": "http://localhost:3000/api/event",
+    "production": ""
+  },
+  {
+    "metadata": "google",
+    "development": "http://localhost:3000/api/google",
+    "production": ""
+  }
+]

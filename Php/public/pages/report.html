@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <link href="./styles/app.css" rel="stylesheet">
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>Report</title>
+</head>
+
+<body>
+
+    <div id="app">
+        <v-app id="inspire">
+            <v-navigation-drawer v-model="drawer" :clipped="$vuetify.breakpoint.lgAndUp" app>
+                <v-list dense>
+                    <template v-for="menu in menus">
+                        <v-row v-if="menu.heading" :key="menu.heading" align="center">
+                            <v-col cols="6">
+                                <v-subheader v-if="menu.heading">
+                                    ${ menu.heading }
+                                </v-subheader>
+                            </v-col>
+                            <v-col cols="6" class="text-center">
+                                <a href="#!" class="body-2 black--text">EDIT</a>
+                            </v-col>
+                        </v-row>
+                        <v-list-group class="py-1" v-else-if="menu.children" :key="menu.text" v-model="menu.model"
+                            append-icon="">
+                            <template v-slot:activator>
+                                <v-list-item-action>
+                                    <v-icon>${menu.icon }</v-icon>
+                                </v-list-item-action>
+
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        ${ menu.text }
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+                            <v-list-item v-for="(child, i) in menu.children" :key="i" link
+                                v-on:click="onNavigate(child.url)">
+
+                                <v-list-item-action>
+                                    <!--
+                                    <v-icon>${child.icon }</v-icon>
+
+                                    -->
+
+                                </v-list-item-action>
+                                <v-list-item-content>
+                                    <v-list-item-subtitle style="font-size:12px">
+                                        ${child.text }
+                                    </v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list-group>
+                        <v-list-item class="py-1 " v-else :key="menu.text" link v-on:click="onNavigate(menu.url)">
+                            <v-list-item-action>
+                                <v-icon>${ menu.icon }</v-icon>
+                            </v-list-item-action>
+                            <v-list-item-content>
+                                <v-list-item-title>
+                                    ${ menu.text }
+                                </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                    </template>
+                </v-list>
+                <template v-slot:append>
+                    <v-btn v-if="profile.isAuthed" class="text-center" style="width: 100%;" text @click="onLogout">Logout</v-btn>
+                </template>
+            </v-navigation-drawer>
+
+            <v-app-bar :clipped-left="$vuetify.breakpoint.lgAndUp" app color="blue darken-3" dark>
+                <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+                <v-toolbar-title style="width: 300px" class="ml-0 pl-4">
+                    <span class="hidden-sm-and-down">Personal</span>
+                </v-toolbar-title>
+
+            </v-app-bar>
+            <v-main>
+                <!--info bar-->
+                <v-snackbar v-model="infoBar.display" :timeout="infoBar.timeout">
+                    ${infoBar.title}
+
+                    <template v-slot:action="{ attrs }">
+                        <v-btn color="red" text v-bind="attrs" @click="infoBar.display = false">
+                            Close
+                        </v-btn>
+                    </template>
+                </v-snackbar>
+
+
+                <!--info dialog-->
+                <v-dialog v-model="infoDialog.display" width="300">
+
+
+                    <v-card>
+                        <v-card-title class="headline text-capitalize lighten-2 px-4" primary-title>
+                            ${infoDialog.title}
+                        </v-card-title>
+
+
+
+                        <v-divider style="width:90%"></v-divider>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="infoDialog.display=false">
+                                close
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+
+
+
+                <v-container>
+                    <v-row>
+
+                        <v-col class="text-left">
+                            <v-select :items="years" item-value="value" item-text="label" v-model="pagination.year"
+                                @change="onYear"></v-select>
+                        </v-col>
+
+                        <v-col>
+                            <v-select :items="months" item-value="value" item-text="label" v-model="pagination.month"
+                                @change="onMonth"></v-select>
+                        </v-col>
+                        <!--
+                        <v-col></v-col>
+                        <v-spacer></v-spacer>
+                        -->
+                    </v-row>
+                    <v-row>
+
+                        <v-col sm="12" xs="12" md="4">
+                            <v-card min-height="450" min-width="300">
+                                <v-card-title>
+                                    Sessions
+                                </v-card-title>
+                                <v-card-text v-if="!reportLoaded" class='text-center'>
+                                    <v-progress-circular :size="50" color="primary" indeterminate>
+                                    </v-progress-circular>
+                                </v-card-text>
+
+
+
+                                <template v-else>
+
+                                    <v-card-text class="pt-6" :key="rowIndex" v-for="(row,rowIndex) in sessions" transition="scroll-y-transition">
+                                        <span class="text-capitalize">
+                                            ${row.session}
+                                        </span>
+                                        <v-progress-linear v-model="row.percentage" height="20">
+                                            <strong> ${row.subTotal}/${row.total}
+                                            </strong>
+                                        </v-progress-linear>
+
+
+                                    </v-card-text>
+                                </template>
+
+
+                            </v-card>
+                        </v-col>
+
+
+                        <v-col sm="12" xs="12" md="4">
+
+
+                            <v-card min-height="450" min-width="300">
+                                <v-card-title>
+                                    Expense
+                                </v-card-title>
+                                <v-card-text class="text-center pt-6">
+                                    <v-progress-circular v-if="!reportLoaded" :size="50" color="primary" indeterminate>
+                                    </v-progress-circular>
+
+                                    <my-pie-chart :config="pieConfig" ref="pie"></my-pie-chart>
+
+                                </v-card-text>
+
+                            </v-card>
+                        </v-col>
+
+                        <v-col sm="12" xs="12" md="4">
+                            <v-card min-height="450" min-width="300">
+                                <v-card-title>
+                                    Payment
+                                </v-card-title>
+
+                                <v-card-text class="text-center">
+
+                                    <v-progress-circular v-if="!reportLoaded" :size="50" color="primary" indeterminate>
+                                    </v-progress-circular>
+
+
+                                    <my-bar-chart :config="barConfig" height="220" ref="bar"></my-bar-chart>
+
+                                </v-card-text>
+
+                            </v-card>
+                        </v-col>
+
+
+                        <v-col sm="12" xs="12" md="12">
+                            <v-card max-height="700">
+
+                                <v-card-text class="text-center">
+                                    <v-progress-circular v-if="!reportLoaded" :size="50" color="primary" indeterminate>
+                                    </v-progress-circular>
+
+                                    <my-line-chart v-else :datasets="lineDatasets" height="300" ref="line">
+                                    </my-line-chart>
+
+
+                                    <!--
+                                    <v-data-table :headers="table.columns" :items="table.rows" :items-per-page="5"
+                                        class="elevation-0">
+                                    </v-data-table>
+                                      -->
+                                </v-card-text>
+
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                </v-container>
+
+
+
+
+            </v-main>
+
+        </v-app>
+
+
+    </div>
+
+</body>
+
+<!--globals-->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+<script src="https://www.chartjs.org/dist/2.9.3/Chart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
+<script src="./components/pie-chart.js"></script>
+<script src="./components/line-chart.js"></script>
+<script src="./components/bar-chart.js"></script>
+
+<script src="./javascript/app.js"></script>
+
+
+
+
+
+<script>
+    Vue.prototype.$http = axios;
+    var app = new Vue({
+        mixins: [appMixin],
+        el: '#app',
+        vuetify: new Vuetify(),
+        data: {
+
+            reportLoaded: true,
+            sessions: [],
+            expenses: [],
+            days: [],
+            payments: [],
+
+            pagination: {
+
+                year: `${new Date().getFullYear()}`,
+                month: new Date().getMonth() + 1,
+            },
+
+            //options
+            years: [],
+            months: [
+                {
+                    value: 1,
+                    label: 'Jan',
+                },
+                {
+                    value: 2,
+                    label: 'Feb',
+                },
+                {
+                    value: 3,
+                    label: 'Mar',
+                }
+                , {
+                    value: 4,
+                    label: 'Apr',
+                }
+                , {
+                    value: 5,
+                    label: 'May',
+                }, {
+                    value: 6,
+                    label: 'Jun',
+                }, {
+                    value: 7,
+                    label: 'Jul',
+                },
+                {
+                    value: 8,
+                    label: 'Aug',
+                },
+                {
+                    value: 9,
+                    label: 'Sep',
+                },
+                {
+                    value: 10,
+                    label: 'Oct',
+                },
+                {
+                    value: 11,
+                    label: 'Nov',
+                },
+                {
+                    value: 12,
+                    label: 'Dec',
+                }
+            ],
+
+        },
+
+        beforeCreate() { },
+        async created() {
+            await this.registerAPI();
+            await this.registerMENU();
+            await this.registerPROFILE();
+            await this.initial();
+            await this.onLoad();
+        },
+        filters: {
+
+
+        },
+        computed: {
+            barConfig: {
+                cache: false,
+                get: function () {
+                    let datasets = [
+                        {
+                            backgroundColor: "rgba(255, 99, 132, 0.5)",
+                            borderColor: 'rgb(255, 99, 132)',
+                            borderWidth: 1,
+                            data: this.payments.map((row) => {
+                                return row.total
+                            }),
+                            label: 'Payment',
+                        }
+                    ]
+                    let config = {
+                        data: {
+                            datasets: datasets,
+                            labels: this.payments.map((row) => {
+                                let string = row.paymentType;
+                                return string.charAt(0).toUpperCase() + string.slice(1);
+
+                            }),
+                        },
+                        options: {
+                            legend: {
+                                position: 'top',
+                            },
+
+                            maintainAspectRatio: false,
+                            animation: {
+                                duration: 0
+                            },
+                            hover: {
+                                animationDuration: 0
+                            },
+                            responsiveAnimationDuration: 0
+                        }
+
+                    }
+                    return config;
+                }
+            },
+            pieConfig: {
+                cache: false,
+                get: function () {
+                    let config = {
+                        data: {
+                            labels: this.expenses.map((row) => {
+                                let string = row.expense;
+                                return string.charAt(0).toUpperCase() + string.slice(1);
+
+                            }),
+                            datasets: [
+                                {
+                                    data: this.expenses.map((row) => {
+                                        return row.total
+                                    }),
+                                    backgroundColor: this.expenses.map((row) => {
+                                        return row.color
+                                    }),
+                                    label: 'Expense'
+                                }
+                            ]
+                        }
+                    }
+                    return config;
+                }
+            },
+            lineDatasets: {
+                cache: false,
+                get: function () {
+                    return [{
+                        label: "Daily Expense",
+                        backgroundColor: "rgba(255, 99, 132, 0.5)",
+                        borderColor: "rgb(255, 99, 132)",
+                        fill: false,
+                        data: this.days.map((day) => {
+                            return {
+                                x: day['date'],
+                                y: day['total']
+                            }
+                        })
+                    }]
+                }
+            },
+            table: {
+                cache: false,
+                get: function () {
+                    return {
+                        columns: [
+
+                            {
+                                text: 'Date',
+                                value: 'date'
+                            },
+                            {
+                                text: 'Total Amount',
+                                value: 'total'
+                            }
+                        ],
+                        rows: this.days
+                    }
+                }
+            },
+
+        },
+        watch: {
+
+
+        },
+        methods: {
+            async onLoad() {
+                if (!this.reportLoaded) return;
+                this.reportLoaded = false;;
+
+
+                let config = {
+                    url: `${this.getEndPoint('report')}?year=${this.pagination.year}&month=${this.pagination.month}`,
+                    method: 'get',
+                    withCredentials: false,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+
+                this.$http.request(config).then((resp) => {
+                    let result = resp.data;
+                    Object.keys(result).forEach((prop) => {
+                        if (this[prop] != undefined) this[prop] = result[prop];
+                    })
+
+                }).finally(() => {
+                    this.reportLoaded = true;
+                });
+            },
+            async initial() {
+                let url = this.getEndPoint('option');
+                let options = [
+                    {
+                        url: `${url}/year`,
+                        prop: 'years'
+                    }
+                ]
+                let config = {
+                    url: url,
+                    method: 'get',
+                    withCredentials: false,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+
+                options.forEach((option) => {
+                    config.url = option.url;
+                    this.$http.request(config).then((resp) => {
+                        this[option.prop] = resp.data
+                    });
+                })
+
+            },
+            onMonth() {
+                this.onLoad();
+            },
+            onYear() {
+                this.onLoad();
+
+            }
+
+        },
+
+
+
+
+
+    })
+</script>
+
+</html>

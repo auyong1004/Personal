@@ -1,0 +1,310 @@
+[
+  {
+    "amount": 0,
+    "from": 0,
+    "to": 30,
+    "employeer": 0.4,
+    "employee": 0.1
+  },
+  {
+    "amount": 30,
+    "from": 30,
+    "to": 50,
+    "employeer": 0.7,
+    "employee": 0.2
+  },
+  {
+    "amount": 20,
+    "from": 50,
+    "to": 70,
+    "employeer": 1.1,
+    "employee": 0.3
+  },
+  {
+    "amount": 20,
+    "from": 70,
+    "to": 100,
+    "employeer": 1.5,
+    "employee": 0.4
+  },
+  {
+    "amount": 30,
+    "from": 100,
+    "to": 140,
+    "employeer": 2.1,
+    "employee": 0.6
+  },
+  {
+    "amount": 40,
+    "from": 140,
+    "to": 200,
+    "employeer": 2.95,
+    "employee": 0.85
+  },
+  {
+    "amount": 60,
+    "from": 200,
+    "to": 300,
+    "employeer": 4.35,
+    "employee": 1.25
+  },
+  {
+    "amount": 100,
+    "from": 300,
+    "to": 400,
+    "employeer": 6.15,
+    "employee": 1.75
+  },
+  {
+    "amount": 100,
+    "from": 400,
+    "to": 500,
+    "employeer": 7.85,
+    "employee": 2.25
+  },
+  {
+    "amount": 100,
+    "from": 500,
+    "to": 600,
+    "employeer": 9.65,
+    "employee": 2.75
+  },
+  {
+    "amount": 100,
+    "from": 600,
+    "to": 700,
+    "employeer": 11.35,
+    "employee": 3.25
+  },
+  {
+    "amount": 100,
+    "from": 700,
+    "to": 800,
+    "employeer": 13.15,
+    "employee": 3.75
+  },
+  {
+    "amount": 100,
+    "from": 800,
+    "to": 900,
+    "employeer": 13.85,
+    "employee": 4.25
+  },
+  {
+    "amount": 100,
+    "from": 900,
+    "to": 1000,
+    "employeer": 16.65,
+    "employee": 4.75
+  },
+  {
+    "amount": 100,
+    "from": 1000,
+    "to": 1100,
+    "employeer": 18.35,
+    "employee": 5.25
+  },
+  {
+    "amount": 100,
+    "from": 1100,
+    "to": 1200,
+    "employeer": 20.15,
+    "employee": 5.75
+  },
+  {
+    "amount": 100,
+    "from": 1200,
+    "to": 1300,
+    "employeer": 21.85,
+    "employee": 6.25
+  },
+  {
+    "amount": 100,
+    "from": 1300,
+    "to": 1400,
+    "employeer": 23.65,
+    "employee": 6.75
+  },
+  {
+    "amount": 100,
+    "from": 1400,
+    "to": 1500,
+    "employeer": 25.35,
+    "employee": 7.25
+  },
+  {
+    "amount": 100,
+    "from": 1500,
+    "to": 1600,
+    "employeer": 27.15,
+    "employee": 7.75
+  },
+  {
+    "amount": 100,
+    "from": 1600,
+    "to": 1700,
+    "employeer": 28.85,
+    "employee": 8.25
+  },
+  {
+    "amount": 100,
+    "from": 1700,
+    "to": 1800,
+    "employeer": 30.65,
+    "employee": 8.75
+  },
+  {
+    "amount": 100,
+    "from": 1800,
+    "to": 1900,
+    "employeer": 32.35,
+    "employee": "9,25"
+  },
+  {
+    "amount": 100,
+    "from": 1900,
+    "to": 2000,
+    "employeer": 34.15,
+    "employee": 9.75
+  },
+  {
+    "amount": 100,
+    "from": 2000,
+    "to": 2100,
+    "employeer": 35.85,
+    "employee": 10.25
+  },
+  {
+    "amount": 100,
+    "from": 2100,
+    "to": 2200,
+    "employeer": 37.65,
+    "employee": 10.75
+  },
+  {
+    "amount": 100,
+    "from": 2200,
+    "to": 2300,
+    "employeer": 39.35,
+    "employee": 11.25
+  },
+  {
+    "amount": 100,
+    "from": 2300,
+    "to": 2400,
+    "employeer": 41.15,
+    "employee": 11.75
+  },
+  {
+    "amount": 100,
+    "from": 2400,
+    "to": 2500,
+    "employeer": 42.85,
+    "employee": 12.25
+  },
+  {
+    "amount": 100,
+    "from": 2500,
+    "to": 2600,
+    "employeer": 44.65,
+    "employee": 12.75
+  },
+  {
+    "amount": 100,
+    "from": 2600,
+    "to": 2700,
+    "employeer": 46.35,
+    "employee": 13.25
+  },
+  {
+    "amount": 100,
+    "from": 2700,
+    "to": 2800,
+    "employeer": 48.15,
+    "employee": 13.75
+  },
+  {
+    "amount": 100,
+    "from": 2800,
+    "to": 2900,
+    "employeer": 49.85,
+    "employee": 14.25
+  },
+  {
+    "amount": 100,
+    "from": 2900,
+    "to": 3000,
+    "employeer": 51.65,
+    "employee": 14.75
+  },
+  {
+    "amount": 100,
+    "from": 3000,
+    "to": 3100,
+    "employeer": 53.35,
+    "employee": 15.25
+  },
+  {
+    "amount": 100,
+    "from": 3100,
+    "to": 3200,
+    "employeer": 55.15,
+    "employee": 15.75
+  },
+  {
+    "amount": 100,
+    "from": 3200,
+    "to": 3300,
+    "employeer": 56.85,
+    "employee": 16.25
+  },
+  {
+    "amount": 100,
+    "from": 3300,
+    "to": 3400,
+    "employeer": 58.65,
+    "employee": 16.75
+  },
+  {
+    "amount": 100,
+    "from": 3400,
+    "to": 3500,
+    "employeer": 60.35,
+    "employee": 17.25
+  },
+  {
+    "amount": 100,
+    "from": 3500,
+    "to": 3600,
+    "employeer": 62.15,
+    "employee": 17.75
+  },
+  {
+    "amount": 100,
+    "from": 3600,
+    "to": 3700,
+    "employeer": 63.85,
+    "employee": 18.25
+  },
+  {
+    "amount": 100,
+    "from": 3700,
+    "to": 3800,
+    "employeer": 65.65,
+    "employee": 18.75
+  },
+  {
+    "amount": 100,
+    "from": 3800,
+    "to": 3900,
+    "employeer": 67.35,
+    "employee": 19.25
+  },
+  {
+    "amount": 100,
+    "from": 3900,
+    "to": 4000,
+    "employeer": 69.05,
+    "employee": 19.75
+  }
+]

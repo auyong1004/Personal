@@ -1,0 +1,17 @@
+[
+  {
+    "icon": "mdi-calendar",
+    "text": "Expense",
+    "url": "/expense"
+  },
+  {
+    "icon": "mdi-book-check",
+    "text": "Todo",
+    "url": "/todo"
+  },
+  {
+    "icon": "mdi-book-check",
+    "text": "Calculator",
+    "url": "/calculator"
+  }
+]

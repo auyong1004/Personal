@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>Todo</title>
+</head>
+
+<body>
+
+    <div id="app">
+        <v-app id="inspire">
+            <v-navigation-drawer v-model="drawer" :clipped="$vuetify.breakpoint.lgAndUp" app>
+                <v-list dense>
+                    <template v-for="menu in menus">
+                        <v-row v-if="menu.heading" :key="menu.heading" align="center">
+                            <v-col cols="6">
+                                <v-subheader v-if="menu.heading">
+                                    ${ menu.heading }
+                                </v-subheader>
+                            </v-col>
+                            <v-col cols="6" class="text-center">
+                                <a href="#!" class="body-2 black--text">EDIT</a>
+                            </v-col>
+                        </v-row>
+                        <v-list-group class="py-1" v-else-if="menu.children" :key="menu.text" v-model="menu.model"
+                            append-icon="">
+                            <template v-slot:activator>
+                                <v-list-item-action>
+                                    <v-icon>${menu.icon }</v-icon>
+                                </v-list-item-action>
+
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        ${ menu.text }
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+                            <v-list-item v-for="(child, i) in menu.children" :key="i" link
+                                v-on:click="onNavigate(child.url)">
+
+                                <v-list-item-action>
+                                    <!--
+                                    <v-icon>${child.icon }</v-icon>
+
+                                    -->
+
+                                </v-list-item-action>
+                                <v-list-item-content>
+                                    <v-list-item-subtitle style="font-size:12px">
+                                        ${child.text }
+                                    </v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list-group>
+                        <v-list-item class="py-1 " v-else :key="menu.text" link v-on:click="onNavigate(menu.url)">
+                            <v-list-item-action>
+                                <v-icon>${ menu.icon }</v-icon>
+                            </v-list-item-action>
+                            <v-list-item-content>
+                                <v-list-item-title>
+                                    ${ menu.text }
+                                </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                    </template>
+                </v-list>
+                <template v-slot:append>
+                    <v-btn v-if="profile.isAuthed" class="text-center" style="width: 100%;" text @click="onLogout">
+                        Logout</v-btn>
+                </template>
+            </v-navigation-drawer>
+
+            <v-app-bar :clipped-left="$vuetify.breakpoint.lgAndUp" app color="blue darken-3" dark>
+                <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+                <v-toolbar-title style="width: 300px" class="ml-0 pl-4">
+                    <span class="hidden-sm-and-down">Personal</span>
+                </v-toolbar-title>
+
+            </v-app-bar>
+            <v-main>
+                <!--info bar-->
+                <v-snackbar v-model="infoBar.display" :timeout="infoBar.timeout">
+                    ${infoBar.title}
+
+                    <template v-slot:action="{ attrs }">
+                        <v-btn color="red" text v-bind="attrs" @click="infoBar.display = false">
+                            Close
+                        </v-btn>
+                    </template>
+                </v-snackbar>
+
+                <!--info dialog-->
+                <v-dialog v-model="infoDialog.display" width="300">
+
+
+                    <v-card>
+                        <v-card-title class="headline text-capitalize lighten-2 px-4" primary-title>
+                            ${infoDialog.title}
+                        </v-card-title>
+
+
+
+                        <v-divider style="width:90%"></v-divider>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="infoDialog.display=false">
+                                close
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                <v-dialog v-model="taskForm.display" fullscreen hide-overlay transition="dialog-bottom-transition">
+                    <v-card>
+                        <v-toolbar dark color="primary">
+                            <v-btn icon dark @click="resetForm">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                            <v-toolbar-title>Task Form</v-toolbar-title>
+                            <v-spacer></v-spacer>
+                            <v-toolbar-items>
+                                <v-btn dark text :disabled="!enableForm" @click="saveForm">Save</v-btn>
+                            </v-toolbar-items>
+                        </v-toolbar>
+
+
+                        <v-card-text>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-select :items="taskLists" class="text-capitalize" v-model="taskForm.list"
+                                        item-text="name" item-value="id" label="List" outlined>
+                                    </v-select>
+                                </v-col>
+
+                                <v-col cols="12">
+                                    <v-text-field v-model="taskForm.subject" label="Subject" outlined>
+
+                                    </v-text-field>
+                                </v-col>
+
+                                <v-col cols="12">
+                                    <v-textarea v-model="taskForm.description" label="Description" outlined>
+
+                                    </v-textarea>
+                                </v-col>
+
+
+
+
+
+                                <v-col cols="12">
+                                    <v-menu ref="menu" v-model="dateMenu" :close-on-content-click="false"
+                                        :return-value.sync="taskForm.dueDate" transition="scale-transition" offset-y
+                                        max-width="290px" min-width="290px">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-text-field v-model="taskForm.dueDate" label="Due Date" readonly
+                                                v-bind="attrs" v-on="on" outlined>
+                                            </v-text-field>
+                                        </template>
+                                        <v-date-picker v-model="taskForm.dueDate" no-title scrollable>
+                                            <v-spacer></v-spacer>
+                                            <v-btn text color="primary" @click="dateMenu = false">Cancel</v-btn>
+                                            <v-btn text color="primary" @click="$refs.menu.save(taskForm.dueDate)">OK
+                                            </v-btn>
+                                        </v-date-picker>
+                                    </v-menu>
+                                </v-col>
+
+                                <v-col cols="12">
+                                    <v-radio-group v-model="taskForm.priority" row>
+                                        <v-radio :label="priority.label" :value="priority.value"
+                                            v-for="(priority,priorityIndex) in priorities" :key="priorityIndex">
+                                        </v-radio>
+                                    </v-radio-group>
+
+                                </v-col>
+                            </v-row>
+                        </v-card-text>
+                    </v-card>
+
+                </v-dialog>
+
+
+                <v-container>
+                    <v-card flat>
+
+
+
+
+
+                        <v-tabs next-icon="mdi-arrow-right" prev-icon="mdi-arrow-left" background-color="white" left
+                            @change="onList">
+                            <v-tab v-for="(list,listIndex) in taskLists" :key="listIndex">
+                                ${list.name}
+                                <template v-if="listIndex>=1">
+                                    <v-btn icon>
+                                        <v-icon small @click="deleteList(list)">
+                                            mdi-delete
+                                        </v-icon>
+                                    </v-btn>
+                                </template>
+                            </v-tab>
+
+                            <v-text-field label="New List" v-model="taskListName" @keydown.enter="createList" solo flat>
+                            </v-text-field>
+                        </v-tabs>
+
+                        <!--
+
+                 
+                        <v-row :align="'start'" :justify="'start'">
+                            <v-col :cols="tabCols">
+
+                            </v-col>
+
+                            <v-col class="pl-0 ml-0">
+                                <v-text-field label="New List" v-model="taskList" @keydown.enter="createList" solo flat>
+                                </v-text-field>
+
+                            </v-col>
+
+
+                        </v-row>
+                        -->
+                    </v-card>
+
+                    <v-row v-if="taskLoaded">
+                        <v-col cols="12">
+
+                            <v-text-field v-model="task" label="What are you working on?" solo
+                                @keydown.enter="createForm">
+                                <v-fade-transition v-slot:append>
+                                    <v-icon v-if="task" @click="create">
+                                        add_circle
+                                    </v-icon>
+                                </v-fade-transition>
+                            </v-text-field>
+
+                            <h2 class="display-1 success--text pl-4">
+                                Tasks:&nbsp;
+                                <v-fade-transition leave-absolute>
+                                    <span :key="`tasks-${filteredTasks.length}`">
+                                        ${ filteredTasks.length }
+                                    </span>
+                                </v-fade-transition>
+                            </h2>
+
+                            <v-divider class="mt-4"></v-divider>
+
+                            <v-row class="my-1" align="center" justify="space-between">
+                                <v-col cols="6">
+
+                                    <strong class="mx-4 info--text text--darken-2">
+                                        Remaining: ${ remainingTasks }
+                                    </strong>
+
+                                    <v-divider vertical></v-divider>
+
+                                    <strong class="mx-4 success--text text--darken-2">
+                                        Completed: ${ completedTasks }
+                                    </strong>
+                                </v-col>
+
+                                <v-spacer></v-spacer>
+                                <v-col class="text-right">
+                                    <v-btn-toggle v-model="pagination.sortDesc" mandatory>
+                                        <v-btn text :value="false">
+                                            ASC
+                                        </v-btn>
+                                        <v-btn text :value="true">
+                                            DESC
+                                        </v-btn>
+                                    </v-btn-toggle>
+                                </v-col>
+
+                                <!--
+                                <v-progress-circular :value="progress" class="mr-2"></v-progress-circular>
+
+                                -->
+                            </v-row>
+
+                            <v-divider class="mb-4"></v-divider>
+                            <v-card v-if="tasks.length > 0">
+
+                                <v-slide-y-transition class="py-0">
+
+                                    <v-data-iterator :items="filteredTasks" items-per-page.sync="5"
+                                        :page="pagination.page" :sort-by="pagination.sortBy.toLowerCase()"
+                                        :sort-desc="pagination.sortDesc" hide-default-footer>
+
+
+                                        <template v-slot:default="props">
+                                            <template v-for="(task, i) in props.items">
+                                                <v-divider v-if="i !== 0" :key="`${i}-divider`"></v-divider>
+
+                                                <v-list-item :key="`${i}-${task.text}`">
+                                                    <v-list-item-action>
+                                                        <v-checkbox @click="updateFormStat(task)" v-model="task.stat"
+                                                            :color="task.stat && 'grey' || 'primary'">
+
+                                                        </v-checkbox>
+                                                    </v-list-item-action>
+
+                                                    <v-list-item-content>
+
+
+                                                        <v-list-item-title
+                                                            :class="task.stat && 'grey--text' || 'primary--text'">
+                                                            ${
+                                                            task.subject
+                                                            }
+
+                                                            <v-chip class="ma-2" :color="task.listColor" x-small label>
+                                                                ${task.listName}
+                                                            </v-chip>
+
+
+                                                        </v-list-item-title>
+                                                        <v-list-item-subtitle>
+                                                            <span class="caption">
+                                                                ${task.dueDate}
+                                                            </span>
+
+                                                        </v-list-item-subtitle>
+                                                        <v-list-item-subtitle v-html="task.description">
+                                                        </v-list-item-subtitle>
+                                                    </v-list-item-content>
+                                                    <v-spacer></v-spacer>
+
+
+                                                    <v-scroll-x-transition>
+                                                        <v-icon v-if="task.stat" color="success">
+                                                            mdi-check
+                                                        </v-icon>
+
+                                                        <v-list-item-action v-else>
+                                                            <v-row>
+
+                                                                <v-btn icon @click="editForm(task)">
+                                                                    <v-icon color="grey lighten-1">mdi-pencil</v-icon>
+                                                                </v-btn>
+
+                                                                <v-btn icon color="red" @click="deleteForm(task)">
+                                                                    <v-icon color="grey lighten-1">mdi-delete</v-icon>
+                                                                </v-btn>
+                                                            </v-row>
+
+                                                        </v-list-item-action>
+
+                                                    </v-scroll-x-transition>
+                                                </v-list-item>
+                                            </template>
+
+                                        </template>
+
+
+                                    </v-data-iterator>
+
+
+
+                                </v-slide-y-transition>
+
+
+                            </v-card>
+
+
+                            <v-btn color="primary" fixed bottom right fab @click="addForm">
+                                <v-icon>mdi-plus</v-icon>
+                            </v-btn>
+
+                        </v-col>
+                    </v-row>
+                    <v-row v-else align="center" justify="center">
+                        <v-col cols="12" class="text-center">
+                            <v-progress-circular :size="50" color="primary" indeterminate>
+                            </v-progress-circular>
+                        </v-col>
+                    </v-row>
+                </v-container>
+
+
+
+
+            </v-main>
+
+        </v-app>
+
+
+    </div>
+
+</body>
+
+<!--globals-->
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
+<script src="./javascript/app.js"></script>
+
+
+
+
+
+<script>
+    Vue.prototype.$http = axios;
+    var app = new Vue({
+        mixins: [appMixin],
+        el: '#app',
+        vuetify: new Vuetify(),
+        data: {
+            pagination: {
+                groupDesc: [],
+                itemsPerPage: 5,
+                multiSort: false,
+                mustSort: false,
+                page: 1,
+                sortBy: 'stat',
+                sortDesc: false,
+                total: 0,
+            },
+            taskLoaded: false,
+            taskListName: null,
+            taskList: 1,
+            taskLists: [],
+            task: null,
+            tasks: [],
+            taskForm: {
+                display: false,
+                selected: null,
+                mode: 'post',
+                id: '',
+                subject: '',
+                description: '-',
+                dueDate: new Date().toISOString().substring(0, 10),
+                createDate: '',
+                list: '1',
+                /*
+                listColor: '',
+                listName: '',
+                */
+                priority: '1',
+                stat: false,
+
+            },
+            //options
+            dateMenu: false,
+            priorities: [{
+                value: '1',
+                label: 'Urgent'
+            },
+            {
+                value: '2',
+                label: 'Important'
+            },
+            {
+                value: '3',
+                label: 'Normal'
+            }],
+
+
+        },
+
+        beforeCreate() { },
+        async created() {
+            await this.registerAPI();
+            await this.registerMENU();
+            await this.registerPROFILE();
+            await this.initial();
+            await this.onLoad();
+        },
+        filters: {
+
+
+        },
+        computed: {
+
+            enableForm: {
+                cache: false,
+                get: function () {
+                    if (this.taskForm.subject.length == 0) return false;
+                    return true;
+                }
+            },
+            /*
+            table: {
+                cache: false,
+                get: function () {
+                    return {
+                        columns: [
+
+                        ],
+                        rows: this.tasks
+                    }
+                }
+            },
+            */
+            filteredTasks() {
+                return this.tasks.filter(task => task.list == this.taskList);
+            },
+            completedTasks() {
+                return this.tasks.filter(task => task.list == this.taskList).filter(task => task.stat).length
+            },
+            remainingTasks() {
+                return this.tasks.filter(task => task.list == this.taskList).length - this.completedTasks
+            },
+            progress() {
+                return this.completedTasks / this.tasks.length * 100
+            },
+
+        },
+        watch: {
+
+
+        },
+        methods: {
+            async initial() {
+                let url = this.getEndPoint('taskList');
+                let options = [{
+                    url: url,
+                    prop: 'taskLists'
+                }
+                ]
+                let config = {
+                    url: url,
+                    method: 'get',
+                    withCredentials: false,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+
+                options.forEach((option) => {
+                    config.url = option.url;
+                    this.$http.request(config).then((resp) => {
+                        this[option.prop] = resp.data
+                    });
+                })
+
+
+            },
+            async onLoad() {
+
+
+                let config = {
+                    url: this.getEndPoint('task'),
+                    method: 'get',
+                    withCredentials: false,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+
+                this.$http.request(config).then((resp) => {
+                    this.tasks = resp.data
+                }).finally(() => {
+                    this.taskLoaded = true;
+                })
+
+            },
+            onList(taskListIndex) {
+
+                this.taskList = this.taskLists[taskListIndex] == undefined ? this.taskLists[0].id : this.taskLists[taskListIndex].id;
+
+            },
+            deleteList(list) {
+                let config = {
+                    url: `${this.getEndPoint('taskList')}/${list.id}`,
+                    method: 'delete',
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+                this.$http.request(config).then((resp) => {
+                    this.taskLists.splice(this.taskLists.indexOf(list), 1);
+                    this.infoBar.display = true;
+                    this.infoBar.title = 'Delete Success'
+                })
+            },
+            createList() {
+                let taskList = {
+                    id: '',
+                    name: this.taskListName,
+                    description: '',
+                    color: ''
+                }
+
+                let config = {
+                    url: `${this.getEndPoint('taskList')}`,
+                    method: 'post',
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    data: taskList
+                }
+                this.$http.request(config).then((resp) => {
+                    taskList.id = resp.data.id;
+                    this.taskLists.push(taskList);
+                    this.infoBar.display = true;
+                    this.infoBar.title = 'Add Success'
+                    console.log(this.taskList);
+                })
+                this.taskListName = null
+
+            },
+            createForm() {
+                if (this.task.length <= 2) return;
+                let task = {
+                    id: '',
+                    subject: this.task,
+                    description: '-',
+                    dueDate: new Date().toISOString().substr(0, 10),
+                    list: this.taskList,
+                    createDate: '',
+                    priority: '1',
+                    stat: false,
+                }
+
+                let config = {
+                    url: `${this.getEndPoint('task')}`,
+                    method: 'post',
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    data: task
+                }
+                this.$http.request(config).then((resp) => {
+                    task.id = resp.data;
+                    this.tasks.push(task);
+                    this.infoBar.display = true;
+                    this.infoBar.title = 'Add Success'
+                })
+
+                this.task = null
+            },
+            addForm() {
+                this.taskForm.display = true;
+                this.taskForm.mode = 'post';
+            },
+            editForm(task) {
+                this.taskForm.display = true;
+                this.taskForm.mode = 'put';
+                this.taskForm.selected = task;
+
+                Object.keys(this.taskForm).forEach((prop) => {
+                    if (task[prop] != undefined) this.taskForm[prop] = task[prop];
+                })
+            },
+            deleteForm(task) {
+
+
+                let config = {
+                    url: `${this.getEndPoint('task')}/${task.id}`,
+                    method: 'delete',
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+                this.$http.request(config).then((resp) => {
+                    this.tasks.splice(this.tasks.indexOf(task), 1);
+                    this.infoBar.display = true;
+                    this.infoBar.title = 'Delete Success'
+                })
+
+            },
+            saveForm() {
+                let list, task, props = ['selected', 'mode', 'display'];
+                task = Object.assign({}, this.taskForm);
+                props.forEach((prop) => {
+                    delete task[prop];
+                })
+
+                config = {
+                    url: `${this.getEndPoint('task')}${this.taskForm.mode == 'post' ? '' : "/" + task.id}`,
+                    method: this.taskForm.mode,
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    data: task
+                }
+                list = this.taskLists.find((taskList) => taskList.id == task.list);
+
+
+                this.$http.request(config).then((resp) => {
+                    if (this.taskForm.mode == 'post') {
+                        task.listColor = list.color;
+                        task.listName = list.name;
+                        task.id = resp.data.id;
+                        this.tasks.push(task);
+                    } else {
+                        this.tasks[this.tasks.indexOf(this.taskForm.selected)] = task;
+                    }
+                    this.infoBar.display = true;
+                    this.infoBar.title = this.taskForm.mode == 'post' ? 'Add Success' : 'Edit Success'
+                    this.resetForm();
+                })
+
+            },
+            resetForm() {
+                this.taskForm = {
+                    display: false,
+                    selected: null,
+                    mode: 'post',
+                    id: '',
+                    subject: '',
+                    description: '',
+                    dueDate: new Date().toISOString().substring(0, 10),
+                    createDate: '',
+                    list: '1',
+                    /*
+                    listColor: '',
+                    listName: '',
+                    */
+                    priority: '1',
+                    stat: false,
+                }
+            },
+            updateFormStat(task) {
+
+                let config = {
+                    url: `${this.getEndPoint('task')}/${task.id}`,
+                    method: 'put',
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    data: {
+                        stat: task.stat
+                    }
+                }
+                this.$http.request(config).then((resp) => {
+                    this.infoBar.display = true;
+                    this.infoBar.title = 'Update Success'
+                })
+            }
+
+        },
+
+
+
+
+
+    })
+</script>
+
+</html>

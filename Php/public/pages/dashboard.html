@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <link href="./styles/app.css" rel="stylesheet">
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>Dashboard</title>
+</head>
+
+<body>
+
+    <div id="app">
+        <v-app id="inspire">
+            <v-navigation-drawer v-model="drawer" :clipped="$vuetify.breakpoint.lgAndUp" app>
+                <v-list dense>
+                    <template v-for="menu in menus">
+                        <v-row v-if="menu.heading" :key="menu.heading" align="center">
+                            <v-col cols="6">
+                                <v-subheader v-if="menu.heading">
+                                    ${ menu.heading }
+                                </v-subheader>
+                            </v-col>
+                            <v-col cols="6" class="text-center">
+                                <a href="#!" class="body-2 black--text">EDIT</a>
+                            </v-col>
+                        </v-row>
+                        <v-list-group class="py-1" v-else-if="menu.children" :key="menu.text" v-model="menu.model"
+                            append-icon="">
+                            <template v-slot:activator>
+                                <v-list-item-action>
+                                    <v-icon>${menu.icon }</v-icon>
+                                </v-list-item-action>
+
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        ${ menu.text }
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+                            <v-list-item v-for="(child, i) in menu.children" :key="i" link
+                                v-on:click="onNavigate(child.url)">
+
+                                <v-list-item-action>
+                                    <!--
+                                    <v-icon>${child.icon }</v-icon>
+
+                                    -->
+
+                                </v-list-item-action>
+                                <v-list-item-content>
+                                    <v-list-item-subtitle style="font-size:12px">
+                                        ${child.text }
+                                    </v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list-group>
+                        <v-list-item class="py-1 " v-else :key="menu.text" link v-on:click="onNavigate(menu.url)">
+                            <v-list-item-action>
+                                <v-icon>${ menu.icon }</v-icon>
+                            </v-list-item-action>
+                            <v-list-item-content>
+                                <v-list-item-title>
+                                    ${ menu.text }
+                                </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                    </template>
+                </v-list>
+                <template v-slot:append>
+                    <v-btn v-if="profile.isAuthed" class="text-center" style="width: 100%;" text @click="onLogout">
+                        Logout</v-btn>
+                </template>
+
+            </v-navigation-drawer>
+
+            <v-app-bar :clipped-left="$vuetify.breakpoint.lgAndUp" app color="blue darken-3" dark>
+                <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+                <v-toolbar-title style="width: 300px" class="ml-0 pl-4">
+                    <span class="hidden-sm-and-down">Personal</span>
+                </v-toolbar-title>
+
+            </v-app-bar>
+            <v-main>
+                <!--info bar-->
+                <v-snackbar v-model="infoBar.display" :timeout="infoBar.timeout">
+                    ${infoBar.title}
+
+                    <template v-slot:action="{ attrs }">
+                        <v-btn color="red" text v-bind="attrs" @click="infoBar.display = false">
+                            Close
+                        </v-btn>
+                    </template>
+                </v-snackbar>
+
+
+                <!--info dialog-->
+                <v-dialog v-model="infoDialog.display" width="300">
+
+
+                    <v-card>
+                        <v-card-title class="headline text-capitalize lighten-2 px-4" primary-title>
+                            ${infoDialog.title}
+                        </v-card-title>
+
+
+
+                        <v-divider style="width:90%"></v-divider>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="infoDialog.display=false">
+                                close
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+
+
+
+                <v-container fluid>
+
+                    <v-row v-if="dashboardLoaded">
+
+                        <v-col sm="12" xs="12" md="4">
+                            <v-card min-height="200">
+                                <v-img src="./assets/cover1.jpg" height="200px"></v-img>
+
+                                <v-list-item two-line>
+                                    <v-list-item-content>
+                                        <v-list-item-title class="headline">Malaysia</v-list-item-title>
+                                        <v-list-item-subtitle>${date}</v-list-item-subtitle>
+                                    </v-list-item-content>
+                                </v-list-item>
+                                <v-card-text>
+                                    <v-row align="center">
+                                        <v-col class="display-2">
+                                            RM
+                                            <span class="display-1">
+                                                ${expense}
+
+                                            </span>
+                                        </v-col>
+                                    </v-row>
+                                </v-card-text>
+                                <v-divider></v-divider>
+
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn text @click="onNavigate('/expense')">Add Record</v-btn>
+
+                                    <v-btn text @click="onNavigate('/report')">Report</v-btn>
+
+                                </v-card-actions>
+                            </v-card>
+                        </v-col>
+
+                        <v-col sm="12" xs="12" md="4">
+                            <v-card min-height="200">
+                                <v-img src="./assets/cover2.jpg" height="200px"></v-img>
+
+                                <v-list-item two-line>
+                                    <v-list-item-content>
+                                        <v-list-item-title class="headline">Task</v-list-item-title>
+                                        <v-list-item-subtitle>Remaining:${tasks.length}</v-list-item-subtitle>
+                                    </v-list-item-content>
+                                </v-list-item>
+
+                                <v-list>
+                                    <template v-for="(task, taskIndex) in tasks">
+
+                                        <v-list-item v:key="task.taskIndex" @click="">
+                                            <v-list-item-avatar>
+                                                <v-icon>
+                                                    mdi-information
+                                                </v-icon>
+                                            </v-list-item-avatar>
+
+                                            <v-list-item-content>
+                                                <v-list-item-title>
+                                                    ${task.subject}
+                                                    <span class="caption">
+                                                        ${task.dueDate}
+                                                    </span>
+                                                </v-list-item-title>
+                                                <v-list-item-subtitle>
+                                                    ${task.description}
+
+                                                </v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                </v-list>
+                                <v-divider></v-divider>
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn text @click="onNavigate('/todo')">View</v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-col>
+
+                        <v-col sm="12" xs="12" md="4">
+                            <v-card min-height="200">
+                                <v-img src="./assets/cover3.jpg" height="200px"></v-img>
+
+                                <v-list-item two-line>
+                                    <v-list-item-content>
+                                        <v-list-item-title class="headline">Events</v-list-item-title>
+                                        <v-list-item-subtitle>Coming event:${events.length}</v-list-item-subtitle>
+                                    </v-list-item-content>
+                                </v-list-item>
+
+                                <v-list>
+                                    <template v-for="(event, eventIndex) in events">
+
+                                        <v-list-item v:key="eventIndex" @click="">
+                                            <v-list-item-avatar>
+                                                <v-icon>
+                                                    mdi-calendar
+                                                </v-icon>
+                                            </v-list-item-avatar>
+
+                                            <v-list-item-content>
+                                                <v-list-item-title>
+                                                    ${event.subject}
+                                                    <span class="caption">
+                                                        ${event.startDate}-${event.endDute}
+                                                    </span>
+                                                </v-list-item-title>
+                                                <v-list-item-subtitle>
+                                                    ${event.description}
+
+                                                </v-list-item-subtitle>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                </v-list>
+                                <v-divider></v-divider>
+                                <v-card-actions>
+                                    <v-spacer></v-spacer>
+                                    <v-btn text @click="onNavigate('/schedule')">View</v-btn>
+                                </v-card-actions>
+                            </v-card>
+                        </v-col>
+
+                        </v-slide-y-transition>
+
+                    </v-row>
+
+                    <v-row v-else align="center" justify="center">
+                        <v-col cols="12" class="text-center">
+                            <v-progress-circular :size="50" color="primary" indeterminate>
+                            </v-progress-circular>
+                        </v-col>
+                    </v-row>
+                </v-container>
+
+
+
+
+            </v-main>
+
+        </v-app>
+
+
+    </div>
+
+</body>
+
+<!--globals-->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+<script src="https://www.chartjs.org/dist/2.9.3/Chart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
+<script src="./components/pie-chart.js"></script>
+<script src="./components/line-chart.js"></script>
+<script src="./components/bar-chart.js"></script>
+
+<script src="./javascript/app.js"></script>
+
+
+
+
+
+<script>
+    Vue.prototype.$http = axios;
+    var app = new Vue({
+        mixins: [appMixin],
+        el: '#app',
+        vuetify: new Vuetify(),
+        data: {
+            expense: 0,
+            tasks: [],
+            events: [],
+            date: new Date(),
+            dashboardLoaded: false,
+        },
+
+        beforeCreate() { },
+        async created() {
+            await this.registerAPI();
+            await this.registerMENU();
+            await this.registerPROFILE();
+            await this.initial();
+        },
+        filters: {
+
+
+        },
+        computed: {
+
+
+        },
+        watch: {
+
+
+        },
+        methods: {
+
+            async initial() {
+
+
+                let url = this.getEndPoint('dashboard');
+
+
+                let config = {
+                    url: url,
+                    method: 'get',
+                    withCredentials: false,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+
+                this.$http.request(config).then((resp) => {
+                    let result = resp.data;
+                    Object.keys(result).forEach((prop) => {
+                        if (this[prop] != undefined) this[prop] = result[prop];
+                    })
+                }).finally(() => {
+                    this.dashboardLoaded = true;
+                })
+
+            },
+
+
+        },
+
+
+
+
+
+    })
+</script>
+
+</html>

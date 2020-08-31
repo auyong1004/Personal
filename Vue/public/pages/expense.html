@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>Expense</title>
+</head>
+
+<body>
+
+    <div id="app">
+        <v-app id="inspire">
+            <v-navigation-drawer v-model="drawer" :clipped="$vuetify.breakpoint.lgAndUp" app>
+                <v-list dense>
+                    <template v-for="menu in menus">
+                        <v-row v-if="menu.heading" :key="menu.heading" align="center">
+                            <v-col cols="6">
+                                <v-subheader v-if="menu.heading">
+                                    {{ menu.heading }}
+                                </v-subheader>
+                            </v-col>
+                            <v-col cols="6" class="text-center">
+                                <a href="#!" class="body-2 black--text">EDIT</a>
+                            </v-col>
+                        </v-row>
+                        <v-list-group class="py-1" v-else-if="menu.children" :key="menu.text" v-model="menu.model"
+                            :prepend-icon="menu.model ? menu.icon : menu['icon-alt']" append-icon="">
+                            <template v-slot:activator>
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        {{ menu.text }}
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+                            <v-list-item v-for="(child, i) in menu.children" :key="i" link
+                                v-on:click="onNavigate(child.url)">
+
+                                <v-list-item-action>
+                                    <!--
+                                    <v-icon>{{ child.icon }}</v-icon>
+
+                                    -->
+
+                                </v-list-item-action>
+                                <v-list-item-content>
+                                    <v-list-item-subtitle style="font-size:12px">
+                                        {{ child.text }}
+                                    </v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list-group>
+                        <v-list-item class="py-1 " v-else :key="menu.text" link v-on:click="onNavigate(menu.url)">
+                            <v-list-item-action>
+                                <v-icon>{{ menu.icon }}</v-icon>
+                            </v-list-item-action>
+                            <v-list-item-content>
+                                <v-list-item-title>
+                                    {{ menu.text }}
+                                </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                    </template>
+                </v-list>
+            </v-navigation-drawer>
+
+            <v-app-bar :clipped-left="$vuetify.breakpoint.lgAndUp" app color="blue darken-3" dark>
+                <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+                <v-toolbar-title style="width: 300px" class="ml-0 pl-4">
+                    <span class="hidden-sm-and-down">Personal</span>
+                </v-toolbar-title>
+
+            </v-app-bar>
+            <v-main>
+                <!--info-->
+                <v-dialog v-model="infoDialog.display" width="300">
+
+
+                    <v-card>
+                        <v-card-title class="headline text-capitalize lighten-2 px-4" primary-title>
+                            {{infoDialog.title}}
+                        </v-card-title>
+
+
+
+                        <v-divider style="width:90%"></v-divider>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="infoDialog.display=false">
+                                close
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+                <v-dialog v-model="expenseForm.display" fullscreen hide-overlay transition="dialog-bottom-transition">
+                    <v-card>
+                        <v-toolbar dark color="primary">
+                            <v-btn icon dark @click="resetForm">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                            <v-toolbar-title>ExpenseForm</v-toolbar-title>
+                            <v-spacer></v-spacer>
+                            <v-toolbar-items>
+                                <v-btn dark text @click="saveForm">Save</v-btn>
+                            </v-toolbar-items>
+                        </v-toolbar>
+
+
+                        <v-card-text>
+                            <v-row>
+                                <v-col cols="6">
+                                    <v-select :items="sessions" v-model="expenseForm.session" label="Session" outlined>
+                                    </v-select>
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-text-field type="number" v-model="expenseForm.amount" label="Amount" outlined>
+                                    </v-text-field>
+
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-select :items="paymentTypes" v-model="expenseForm.paymentType"
+                                        label="Payment Type" outlined>
+                                    </v-select>
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-select :items="expenseTypes" v-model="expenseForm.expenseType"
+                                        label="Expense Type" outlined>
+                                    </v-select>
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-checkbox v-model="expenseForm.refundable" label="Refundable"></v-checkbox>
+
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-checkbox v-model="expenseForm.claimable" label="claimable"></v-checkbox>
+
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-textarea v-model="expenseForm.Remark" label="remark" outlined></v-textarea>
+                                </v-col>
+                            </v-row>
+                        </v-card-text>
+                    </v-card>
+
+                </v-dialog>
+                <v-container fluid>
+
+
+                    <v-row>
+
+                        <v-col cols="12">
+                            <v-card>
+
+                                <v-btn color="pink" fixed bottom right fab>
+                                    <v-icon @click="addForm">mdi-plus</v-icon>
+                                </v-btn>
+
+                                <v-data-table :headers="table.columns" :items="table.rows" class="elevation-0">
+                                    <template v-slot:item.action="{ item }">
+                                        <v-btn @click="editForm(item)" icon>
+                                            <v-icon>mdi-pencil</v-icon>
+                                        </v-btn>
+                                        <v-btn @click="deleteForm(item)" icon>
+                                            <v-icon>mdi-delete</v-icon>
+                                        </v-btn>
+                                    </template>
+                                </v-data-table>
+                            </v-card>
+
+                        </v-col>
+                    </v-row>
+
+
+                </v-container>
+
+
+
+
+            </v-main>
+
+        </v-app>
+
+
+    </div>
+
+</body>
+
+<!--globals-->
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
+<script src="./javascript/app.js"></script>
+
+
+
+
+
+<script>
+    Vue.prototype.$http = axios;
+    var app = new Vue({
+        mixins: [appMixin],
+        el: '#app',
+        vuetify: new Vuetify(),
+        data: {
+            pagination: {
+                total: '',
+            },
+            expenses: [],
+            expenseForm: {
+                display: false,
+                selected: null,
+                mode: 'post',
+                id: '',
+                session: '',
+                amount: '',
+                paymentType: '',
+                expenseType: '',
+                claimable: false,
+                refundable: false,
+                remark: ''
+            },
+            //options
+            sessions: [1, 2, 3],
+            paymentTypes: [1, 2, 3],
+            expenseTypes: [1, 2, 3],
+
+        },
+
+        beforeCreate() { },
+        async created() {
+            await this.registerAPI();
+            await this.registerMENU();
+            await this.initial();
+        },
+        filters: {
+
+
+        },
+        computed: {
+            table: {
+                cache: false,
+                get: function () {
+                    return {
+                        columns: [
+                            {
+                                text: 'Session',
+                                value: 'session'
+                            },
+                            {
+                                text: 'Amount',
+                                value: 'amount'
+                            },
+                            {
+                                text: 'Payment',
+                                value: 'paymentType'
+                            },
+                            {
+                                text: 'Remark',
+                                value: 'remark'
+                            },
+                            {
+                                text: 'Action',
+                                value: 'action'
+                            }
+                        ],
+                        rows: this.expenses
+                    }
+                }
+            }
+        },
+        watch: {
+
+
+        },
+        methods: {
+            async initial() {
+
+
+            },
+            addForm() {
+                this.expenseForm.display = true;
+                this.expenseForm.mode = 'post';
+            },
+            editForm(expense) {
+                this.expenseForm.display = true;
+                this.expenseForm.mode = 'put';
+                this.expenseForm.selected = expense;
+
+                Object.keys(this.expenseForm).forEach((prop) => {
+                    if (expense[prop] != undefined) this.expenseForm[prop] = expense[prop];
+                })
+            },
+            deleteForm(expense) {
+                this.expenses.splice(this.expenses.indexOf(expense),1);
+                this.infoDialog.display = true;
+                this.infoDialog.title = 'Delete Success'
+
+            },
+            saveForm() {
+                let expense, props = ['selected', 'mode', 'display'];
+                expense = Object.assign({}, this.expenseForm);
+                props.forEach((prop) => {
+                    delete expense[prop];
+                })
+
+                if (this.expenseForm.mode == 'post') {
+                    this.expenses.push(expense);
+                } else {
+                    this.expenses[this.expenses.indexOf(this.expenseForm.selected)] = expense;
+                }
+
+                this.infoDialog.display = true;
+                this.infoDialog.title = this.expenseForm.mode == 'post' ? 'Add Success' : 'Edit Success'
+                this.resetForm();
+            },
+            resetForm() {
+                this.expenseForm = {
+                    display: false,
+                    selected: null,
+                    mode: 'post',
+                    session: '',
+                    amount: '',
+                    paymentType: '',
+                    expenseType: '',
+                    claimable: false,
+                    refundable: false,
+                    remark: ''
+                }
+            },
+
+
+        },
+
+
+
+
+
+    })
+</script>
+
+</html>

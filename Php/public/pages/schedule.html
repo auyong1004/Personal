@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <link href="./styles/app.css" rel="stylesheet">
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>Schedule</title>
+</head>
+
+<body>
+
+    <div id="app">
+        <v-app id="inspire">
+            <v-navigation-drawer v-model="drawer" :clipped="$vuetify.breakpoint.lgAndUp" app>
+                <v-list dense>
+                    <template v-for="menu in menus">
+                        <v-row v-if="menu.heading" :key="menu.heading" align="center">
+                            <v-col cols="6">
+                                <v-subheader v-if="menu.heading">
+                                    ${ menu.heading }
+                                </v-subheader>
+                            </v-col>
+                            <v-col cols="6" class="text-center">
+                                <a href="#!" class="body-2 black--text">EDIT</a>
+                            </v-col>
+                        </v-row>
+                        <v-list-group class="py-1" v-else-if="menu.children" :key="menu.text" v-model="menu.model"
+                            append-icon="">
+                            <template v-slot:activator>
+                                <v-list-item-action>
+                                    <v-icon>${menu.icon }</v-icon>
+                                </v-list-item-action>
+
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        ${ menu.text }
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                            </template>
+                            <v-list-item v-for="(child, i) in menu.children" :key="i" link
+                                v-on:click="onNavigate(child.url)">
+
+                                <v-list-item-action>
+                                    <!--
+                                    <v-icon>${child.icon }</v-icon>
+
+                                    -->
+
+                                </v-list-item-action>
+                                <v-list-item-content>
+                                    <v-list-item-subtitle style="font-size:12px">
+                                        ${child.text }
+                                    </v-list-item-subtitle>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list-group>
+                        <v-list-item class="py-1 " v-else :key="menu.text" link v-on:click="onNavigate(menu.url)">
+                            <v-list-item-action>
+                                <v-icon>${ menu.icon }</v-icon>
+                            </v-list-item-action>
+                            <v-list-item-content>
+                                <v-list-item-title>
+                                    ${ menu.text }
+                                </v-list-item-title>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                    </template>
+                </v-list>
+                <template v-slot:append>
+                    <v-btn v-if="profile.isAuthed" class="text-center" style="width: 100%;" text @click="onLogout">
+                        Logout</v-btn>
+                </template>
+            </v-navigation-drawer>
+
+            <v-app-bar :clipped-left="$vuetify.breakpoint.lgAndUp" app color="blue darken-3" dark>
+                <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+                <v-toolbar-title style="width: 300px" class="ml-0 pl-4">
+                    <span class="hidden-sm-and-down">Personal</span>
+                </v-toolbar-title>
+
+            </v-app-bar>
+            <v-main>
+                <!--expense-->
+                <v-dialog v-model="eventForm.display" fullscreen hide-overlay transition="dialog-bottom-transition">
+                    <v-card>
+                        <v-toolbar dark color="primary">
+                            <v-btn icon dark @click="resetForm">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
+                            <v-toolbar-title>Event Form</v-toolbar-title>
+                            <v-spacer></v-spacer>
+                            <v-toolbar-items>
+                                <v-btn dark text @click="deleteForm">Delete</v-btn>
+                                <v-btn dark text @click="saveForm" :disabled="!enableForm">Save</v-btn>
+                            </v-toolbar-items>
+                        </v-toolbar>
+
+
+                        <v-card-text>
+                            <v-row>
+                                <v-col cols="6">
+                                    <v-text-field v-model="eventForm.subject" label="Subject" outlined>
+                                    </v-text-field>
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-textarea v-model="eventForm.description" label="Description" outlined>
+                                    </v-textarea>
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-menu ref="startMenu" v-model="startMenu" :close-on-content-click="false"
+                                        :return-value.sync="eventForm.startDate" transition="scale-transition" offset-y
+                                        min-width="290px">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-text-field v-model="eventForm.startDate" label="Start Date" outlined
+                                                readonly v-bind="attrs" v-on="on"></v-text-field>
+                                        </template>
+                                        <v-date-picker v-model="eventForm.startDate" no-title scrollable>
+                                            <v-spacer></v-spacer>
+                                            <v-btn text color="primary" @click="startMenu = false">Cancel</v-btn>
+                                            <v-btn text color="primary"
+                                                @click="$refs.startMenu.save(eventForm.startDate)">
+                                                OK
+                                            </v-btn>
+                                        </v-date-picker>
+                                    </v-menu>
+                                </v-col>
+
+                                <v-col cols="6">
+                                    <v-menu ref="endMenu" v-model="endMenu" :close-on-content-click="false"
+                                        :return-value.sync="eventForm.endDate" transition="scale-transition" offset-y
+                                        min-width="290px">
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-text-field v-model="eventForm.endDate" label="End Date" outlined readonly
+                                                v-bind="attrs" v-on="on"></v-text-field>
+                                        </template>
+                                        <v-date-picker v-model="eventForm.endDate" no-title scrollable>
+                                            <v-spacer></v-spacer>
+                                            <v-btn text color="primary" @click="endMenu = false">Cancel</v-btn>
+                                            <v-btn text color="primary" @click="$refs.endMenu.save(eventForm.endDate)">
+                                                Ok
+                                            </v-btn>
+
+                                        </v-date-picker>
+                                    </v-menu>
+                                </v-col>
+
+
+
+
+                                <v-col cols="6">
+                                    <v-checkbox v-model="eventForm.recurring" label="Recurring"></v-checkbox>
+
+                                </v-col>
+
+                                <v-col cols="6">
+
+                                    <v-text-field :disabled="!eventForm.recurring" v-model="eventForm.cron" label="Cron"
+                                        outlined>
+                                    </v-text-field>
+
+
+
+                                </v-col>
+
+                            </v-row>
+                        </v-card-text>
+                    </v-card>
+
+                </v-dialog>
+
+
+                <!--info bar-->
+                <v-snackbar v-model="infoBar.display" :timeout="infoBar.timeout">
+                    ${infoBar.title}
+
+                    <template v-slot:action="{ attrs }">
+                        <v-btn color="red" text v-bind="attrs" @click="infoBar.display = false">
+                            Close
+                        </v-btn>
+                    </template>
+                </v-snackbar>
+
+
+                <v-dialog v-model="loginDialog.display" persistent max-width="290">
+                    <v-card>
+                        <v-card-title class="headline">Alert!
+                        </v-card-title>
+                        <v-card-text>
+                            You are required to login to use Google's Calendar service </v-card-text>
+
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+
+
+
+                            <v-btn color="green darken-1" text @click="googleLogin">
+                                Agree
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+
+
+                <!--info dialog-->
+                <v-dialog v-model="infoDialog.display" width="300">
+
+
+                    <v-card>
+                        <v-card-title class="headline text-capitalize lighten-2 px-4" primary-title>
+                            ${infoDialog.title}
+                        </v-card-title>
+
+
+
+                        <v-divider style="width:90%"></v-divider>
+
+                        <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="primary" text @click="infoDialog.display=false">
+                                close
+                            </v-btn>
+                        </v-card-actions>
+                    </v-card>
+                </v-dialog>
+
+
+
+                <v-container>
+
+
+                    <v-row class="fill-height">
+                        <v-col>
+                            <v-card>
+                                <v-btn color="primary" fixed bottom right fab @click="addForm">
+                                    <v-icon>mdi-plus</v-icon>
+                                </v-btn>
+                                <v-sheet height="64">
+                                    <v-toolbar flat color="white">
+                                        <v-btn outlined class="mr-4" color="grey darken-2" @click="setToday">
+                                            Today
+                                        </v-btn>
+                                        <v-btn fab text small color="grey darken-2" @click="onPrev">
+                                            <v-icon small>mdi-chevron-left</v-icon>
+                                        </v-btn>
+                                        <v-btn fab text small color="grey darken-2" @click="onNext">
+                                            <v-icon small>mdi-chevron-right</v-icon>
+                                        </v-btn>
+                                        <v-toolbar-title v-if="$refs.calendar" class="d-none d-lg-block">
+                                            ${ $refs.calendar.title }
+                                        </v-toolbar-title>
+                                        <v-spacer></v-spacer>
+                                        <v-menu bottom right>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                <v-btn outlined color="grey darken-2" v-bind="attrs" v-on="on">
+                                                    <span>${ typeToLabel[type] }</span>
+                                                    <v-icon right>mdi-menu-down</v-icon>
+                                                </v-btn>
+                                            </template>
+                                            <v-list>
+                                                <v-list-item @click="type = 'day'">
+                                                    <v-list-item-title>Day</v-list-item-title>
+                                                </v-list-item>
+                                                <v-list-item @click="type = 'week'">
+                                                    <v-list-item-title>Week</v-list-item-title>
+                                                </v-list-item>
+                                                <v-list-item @click="type = 'month'">
+                                                    <v-list-item-title>Month</v-list-item-title>
+                                                </v-list-item>
+                                                <v-list-item @click="type = '4day'">
+                                                    <v-list-item-title>4 days</v-list-item-title>
+                                                </v-list-item>
+                                            </v-list>
+                                        </v-menu>
+                                    </v-toolbar>
+                                </v-sheet>
+                                <v-sheet height="600">
+                                    <v-calendar ref="calendar" v-model="focus" color="primary" :events="events"
+                                        :event-color="getEventColor" :type="type" @click:event="editForm"
+                                        @click:more="viewDay" @click:date="viewDay" @change="onLoad"></v-calendar>
+
+                                    <v-menu v-model="eventDialog.display" :activator="selectedElement"
+                                        :close-on-content-click="false" offset-x>
+                                        <v-card min-width="350px" flat>
+                                            <v-toolbar :color="eventDialog.color" dark>
+
+                                                <v-toolbar-title v-html="eventDialog.subject"></v-toolbar-title>
+                                                <v-spacer></v-spacer>
+
+                                                <v-btn icon @click="eventDialog.display = false">
+                                                    <v-icon>mdi-close</v-icon>
+                                                </v-btn>
+                                            </v-toolbar>
+                                            <v-card-text>
+                                                <v-list>
+                                                    <v-list-item>
+                                                        <v-list-item-content>
+                                                            <v-list-item-title>Start</v-list-item-title>
+                                                            <v-list-item-subtitle>${eventDialog.startDate}
+                                                            </v-list-item-subtitle>
+                                                        </v-list-item-content>
+                                                    </v-list-item>
+
+                                                    <v-list-item>
+                                                        <v-list-item-content>
+                                                            <v-list-item-title>Event</v-list-item-title>
+                                                            <v-list-item-subtitle>${eventDialog.endDate}
+                                                            </v-list-item-subtitle>
+                                                        </v-list-item-content>
+                                                    </v-list-item>
+
+
+                                                    <v-list-item>
+                                                        <v-list-item-content>
+                                                            <v-list-item-title>Link</v-list-item-title>
+                                                            <v-list-item-subtitle>${eventDialog.link}
+                                                            </v-list-item-subtitle>
+                                                        </v-list-item-content>
+                                                    </v-list-item>
+                                                </v-list>
+
+                                            </v-card-text>
+
+                                        </v-card>
+                                    </v-menu>
+                                </v-sheet>
+                            </v-card>
+
+                        </v-col>
+                    </v-row>
+
+                </v-container>
+
+
+
+
+            </v-main>
+
+        </v-app>
+
+
+    </div>
+
+</body>
+
+<!--globals-->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+<script src="https://www.chartjs.org/dist/2.9.3/Chart.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js"></script>
+<script src="./components/pie-chart.js"></script>
+<script src="./components/line-chart.js"></script>
+<script src="./components/bar-chart.js"></script>
+
+<script src="./javascript/app.js"></script>
+
+
+
+
+
+<script>
+    Vue.prototype.$http = axios;
+    var app = new Vue({
+        mixins: [appMixin],
+        el: '#app',
+        vuetify: new Vuetify(),
+        data: {
+            focus: '',
+            type: 'month',
+            typeToLabel: {
+                month: 'Month',
+                week: 'Week',
+                day: 'Day',
+                '4day': '4 Days',
+            },
+            colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
+            names: ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party'],
+            scheduleLoaded:false,
+            pagination: {
+                year: `${new Date().getFullYear()}`,
+                month: new Date().getMonth() + 1,
+            },
+            primaryEvent: {
+                total: 0,
+                events: []
+            },
+            googleEvent: {
+                total: 0,
+                events: []
+            },
+            loginDialog: {
+                display: false,
+            },
+            eventDialog: {
+                display: false,
+                subject: '',
+                description: '',
+                startDate: '',
+                endDate: '',
+                link: '',
+                color: '',
+            },
+            eventForm: {
+                display: false,
+                mode: 'post',
+                selected: null,
+                id: '',
+                subject: '',
+                description: '',
+                startDate: new Date().toISOString().substring(0, 10),
+                endDate: new Date().toISOString().substring(0, 10),
+                type: 'primary',
+                cron: '',
+                recurring: false,
+
+            },
+            //date picker
+            startMenu: false,
+            endMenu: false,
+            selectedElement: null,
+            //option
+            colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
+            names: ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party'],
+
+        },
+
+        beforeCreate() { },
+        async created() {
+            await this.registerAPI();
+            await this.registerMENU();
+            await this.registerPROFILE();
+            await this.initial();
+            await this.onLoad({});
+        },
+        mounted() {
+            this.$refs.calendar.checkChange()
+        },
+        filters: {
+
+
+        },
+        computed: {
+            enableForm: {
+                cache: false,
+                get: function () {
+                    if (this.eventForm.startDate.length == 0) return false;
+                    if (this.eventForm.subject.length == 0) return false;
+                    return true;
+                }
+            },
+            events: {
+                cache: false,
+                get: function () {
+
+                    let events = [...this.primaryEvent.events, ...this.googleEvent.events]
+                    return events.map((event) => {
+                        let model = {
+                            name: event.subject,
+                            start: new Date(event.startDate),
+                            end: new Date(event.endDate),
+                            color: event.type == 'google' ? 'blue' : 'green',
+                            timed: false,
+                            default: event,
+                        }
+                        return model;
+                    })
+                }
+            }
+
+        },
+        watch: {
+
+
+        },
+        methods: {
+            async onLoad({ start, end }) {
+
+                if (start) {
+                    this.pagination.month = start.month;
+                    this.pagination.year = start.year;
+                }
+                if (this.endpoints.length == 0) return;
+                let options = [{
+                    url: `${this.getEndPoint('event')}?year=${this.pagination.year}&month=${this.pagination.month}`,
+                    prop: 'primaryEvent'
+                }, {
+                    url: `${this.getEndPoint('google')}/calendar?year=${this.pagination.year}&month=${this.pagination.month}`,
+                    prop: 'googleEvent'
+                }
+                ]
+                let config = {
+                    url: ``,
+                    method: 'get',
+                    withCredentials: false,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+
+                options.forEach((option) => {
+                    config.url = option.url;
+                    this.$http.request(config).then((resp) => {
+
+                        this[option.prop] = resp.data
+                    }, err => {
+                        if (option.prop == 'googleEvent') this.loginDialog.display = true;
+
+                    });
+                })
+                this.scheduleLoaded=true;
+            },
+            async initial() {
+            },
+
+            viewDay({ date }) {
+                this.focus = date
+                this.type = 'day'
+            },
+            getEventColor(event) {
+                return event.color
+            },
+            setToday() {
+                this.focus = ''
+            },
+            onPrev() {
+                this.$refs.calendar.prev()
+            },
+            onNext() {
+                this.$refs.calendar.next()
+            },
+
+
+            addForm() {
+                this.eventForm.display = true;
+                this.eventForm.mode = 'post';
+            },
+            editForm({ nativeEvent, event }) {
+                this.selectedElement = nativeEvent.target
+                let defaultEvent = event.default;
+
+                if (defaultEvent.type == 'google') {
+                    //this.infoBar.display = true;
+                    //this.infoBar.title = 'Google Event cannot be edit!'
+
+                    Object.keys(this.eventDialog).forEach((prop) => {
+                        if (defaultEvent[prop] != undefined) this.eventDialog[prop] = defaultEvent[prop];
+                    })
+                    this.eventDialog.display = true;
+                    nativeEvent.stopPropagation()
+
+                    return;
+                }
+
+                this.eventForm.display = true;
+                this.eventForm.mode = 'put';
+                this.eventForm.selected = event;
+
+                Object.keys(this.eventForm).forEach((prop) => {
+                    if (defaultEvent[prop] != undefined) this.eventForm[prop] = defaultEvent[prop];
+                })
+
+
+            },
+            deleteForm() {
+                let event = this.eventForm.selected;
+                let config = {
+                    url: `${this.getEndPoint('event')}/${event.id}`,
+                    method: 'delete',
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+                this.$http.request(config).then((resp) => {
+                    this.primaryEvent.events.splice(this.primaryEvent.events.indexOf(event), 1);
+                    this.infoBar.display = true;
+                    this.infoBar.title = 'Delete Success'
+                })
+                this.resetForm();
+            },
+            saveForm() {
+                let config, event, props = ['selected', 'mode', 'display'];
+                event = Object.assign({}, this.eventForm);
+                props.forEach((prop) => {
+                    delete event[prop];
+                })
+
+                config = {
+                    url: `${this.getEndPoint('event')}${this.eventForm.mode == 'post' ? '' : "/" + event.id}`,
+                    method: this.eventForm.mode,
+                    withCredentials: true,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    data: event
+                }
+
+                this.$http.request(config).then((resp) => {
+                    if (this.eventForm.mode == 'post') {
+                        event.id = resp.data.id;
+                        this.primaryEvent.events.push(event);
+                    } else {
+                        this.primaryEvent.events[this.primaryEvent.events.indexOf(this.eventForm.selected)] = event;
+                    }
+
+                    this.infoBar.display = true;
+                    this.infoBar.title = this.eventForm.mode == 'post' ? 'Add Success' : 'Edit Success'
+                    this.resetForm();
+                })
+            },
+            resetForm() {
+                this.eventForm = {
+                    display: false,
+                    mode: 'post',
+                    selected: null,
+                    id: '',
+                    subject: '',
+                    description: '',
+                    startDate: new Date().toISOString().substring(0, 10),
+                    endDate: new Date().toISOString().substring(0, 10),
+                    type: 'primary',
+                    cron: '',
+                    recurring: false,
+                }
+            },
+            googleLogin() {
+                window.location = '/api/google/oAuth/login';
+            }
+        },
+
+
+
+
+
+    })
+</script>
+
+</html>
