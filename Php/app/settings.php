@@ -26,16 +26,17 @@ return function (ContainerBuilder $containerBuilder) {
                     'cache_path' => __DIR__ . '/../tmp/twig',
                 ],
             ],
+            //setup ur google id
             'google'=>[
-                'id'=>'221731964363-1lhn136eq32febssnl1p794qank9dhi0.apps.googleusercontent.com',
-                'secret'=>'8lHkT4ROme5Rw2o1l8HOcU8y',
+                'id'=>'',
+                'secret'=>'',
                 'credential'=>__DIR__ . '/../credentials.json',                
             ]
         ],
         'db1'=>[
-            'host'=>'localhost',
-            'username'=>'developer',
-            'password'=>'alex1234',
+            'host'=>'',
+            'username'=>'',
+            'password'=>'',
             'database'=>'personal'
         ],
 
