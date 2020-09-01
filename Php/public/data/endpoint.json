@@ -2,42 +2,42 @@
   {
     "metadata": "dashboard",
     "development": "http://localhost:3000/api/dashboard",
-    "production": ""
+    "production": "http://34.70.243.4/personal/public/api/dashboard"
   },
   {
     "metadata": "option",
     "development": "http://localhost:3000/api/option",
-    "production": ""
+    "production": "http://34.70.243.4/personal/public/api/option"
   },
   {
     "metadata": "task",
     "development": "http://localhost:3000/api/task",
-    "production": ""
+    "production": "http://34.70.243.4/personal/public/api/task"
   },
   {
     "metadata": "taskList",
     "development": "http://localhost:3000/api/taskList",
-    "production": ""
+    "production": "http://34.70.243.4/personal/public/api/taskList"
   },
   {
     "metadata": "expense",
     "development": "http://localhost:3000/api/expense",
-    "production": ""
+    "production": "http://34.70.243.4/personal/public/api/expense"
   },
 
   {
     "metadata": "report",
     "development": "http://localhost:3000/api/report",
-    "production": ""
+    "production": "http://34.70.243.4/personal/public/api/report"
   },
   {
     "metadata": "event",
     "development": "http://localhost:3000/api/event",
-    "production": ""
+    "production": "http://34.70.243.4/personal/public/api/event"
   },
   {
     "metadata": "google",
     "development": "http://localhost:3000/api/google",
-    "production": ""
+    "production": "http://34.70.243.4/personal/public/api/google"
   }
 ]

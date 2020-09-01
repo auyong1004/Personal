@@ -94,6 +94,8 @@ class EventController extends Controller
         ];
         foreach ($form as $formProp => $formValue) {
             if(isset($post[$formProp]))$form[$formProp]=$post[$formProp];
+            //boolean handler
+            if(is_bool ($form[$formProp]))$form[$formProp]= ($form[$formProp])?'1':'0';
         }
         
         $sql="INSERT INTO `p_event` (`e_id`, `e_subject`, `e_start_date`, `e_end_date`, `e_create_date`, `e_update_date`, `e_description`, `e_type`, `e_cron`, `e_recurring`) 
@@ -139,6 +141,8 @@ class EventController extends Controller
         $form=$this->mysqlService->queryOps($sql)[0];
         foreach ($form as $formProp => $formValue) {
             if(isset($post[$formProp]))$form[$formProp]=$post[$formProp];
+            //boolean handler
+            if(is_bool ($form[$formProp]))$form[$formProp]= ($form[$formProp])?'1':'0';
         }
         $sql="UPDATE `p_event` SET
         `e_subject`='{$form['subject']}',

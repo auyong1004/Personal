@@ -51,6 +51,7 @@ class TaskListController extends Controller
         ];
         foreach ($form as $formProp => $formValue) {
             if(isset($post[$formProp]))$form[$formProp]=$post[$formProp];
+            if(is_bool ($form[$formProp]))$form[$formProp]= ($form[$formProp])?'1':'0';
         }
         
         $sql="INSERT INTO `p_task_list` (`tk_id`, `tk_name`, `tk_description`, `tk_color`, `tk_create_date`) VALUES (NULL, '{$form['name']}', '{$form['description']}', '{$form['color']}', CURRENT_TIMESTAMP);";
@@ -86,6 +87,7 @@ class TaskListController extends Controller
 
         foreach ($form as $formProp => $formValue) {
             if(isset($post[$formProp]))$form[$formProp]=$post[$formProp];
+            if(is_bool ($form[$formProp]))$form[$formProp]= ($form[$formProp])?'1':'0';
         }
 
         $sql="UPDATE `p_task` SET

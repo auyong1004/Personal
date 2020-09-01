@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
 
+
 //different in production REMEMBER!
 define("APP_FOLDER",getcwd()."../../");
 define("APP_PATH","http://localhost:3000/");
+//define("APP_PATH","http://104.154.220.199/personal/public/");
 define("AUTH_TYPES", [
     "API_KEY"=>"API_KEY",
     "BASIC_AUTH"=>"BASIC_AUTH",
@@ -45,7 +47,6 @@ $repositories($containerBuilder);
 $container = $containerBuilder->build();
 
 
-
 /*
 //another method set DI
 $container->set('myService', function () {
@@ -65,6 +66,7 @@ $app = AppFactory::create();
 
 
 //path resolve
+//$app->setBasePath("/personal/public");
 $app->setBasePath("");
 
 $callableResolver = $app->getCallableResolver();
@@ -103,3 +105,5 @@ $errorMiddleware->setDefaultErrorHandler($errorHandler);
 $response = $app->handle($request);
 $responseEmitter = new ResponseEmitter();
 $responseEmitter->emit($response);
+
+

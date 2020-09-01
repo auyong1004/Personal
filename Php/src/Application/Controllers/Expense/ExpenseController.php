@@ -94,15 +94,20 @@ class ExpenseController extends Controller
         ];
         foreach ($form as $formProp => $formValue) {
             if(isset($post[$formProp]))$form[$formProp]=$post[$formProp];
+            //boolean handler
+            if(is_bool ($form[$formProp]))$form[$formProp]= ($form[$formProp])?'1':'0';
+
         }
         
         $sql="INSERT INTO `p_expense` (`e_id`, `s_id`, `pt_id`, `et_id`, `e_amount`, `e_claimable`, `e_refundable`, `e_remark`,`e_receipt_date`, `e_create_date`, `e_update_date`)
               VALUES (NULL, '{$form['session']}', '{$form['paymentType']}', '{$form['expenseType']}', '{$form['amount']}', '{$form['claimable']}', '{$form['refundable']}', '{$form['remark']}','{$form['receiptDate']}', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);";
         $this->mysqlService->queryOps($sql,"INSERT");
 
+
         $payload = new ControllerPayload(200, [
             'id'=>$this->mysqlService->getLastID()
         ]);
+
 
         return $this->respondJSON($response,$payload);    
 
@@ -128,7 +133,7 @@ class ExpenseController extends Controller
         */
 
         $sql="SELECT a.e_id as 'id',a.s_id as 'session',a.pt_id as 'paymentType',a.et_id as 'expenseType',
-        a.e_amount as 'amount',a.e_claimable as 'claimable',a.e_remark as 'remark',a.e_refundable,a.e_update_date as 'updateDate',e_receipt_date as 'receiptDate'
+        a.e_amount as 'amount',a.e_claimable as 'claimable',a.e_remark as 'remark',a.e_refundable as 'refundable',a.e_update_date as 'updateDate',e_receipt_date as 'receiptDate'
         FROM `p_expense` a WHERE a.e_id='$id'";
 
         if($this->mysqlService->countOps($sql)==0){
@@ -141,6 +146,8 @@ class ExpenseController extends Controller
 
         foreach ($form as $formProp => $formValue) {
             if(isset($post[$formProp]))$form[$formProp]=$post[$formProp];
+            //boolean handler
+            if(is_bool ($form[$formProp]))$form[$formProp]= ($form[$formProp])?'1':'0';
         }
 
 

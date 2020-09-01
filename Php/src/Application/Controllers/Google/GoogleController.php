@@ -57,7 +57,8 @@ class GoogleController extends Controller
 
         $this->google->setAuthConfig($setting['credential']);
         $this->google->setAccessType('offline');
-        $this->google->setRedirectUri('http://localhost:3000/api/google/oAuth/login');
+        //$this->google->setRedirectUri('http://localhost:3000/api/google/oAuth/login');
+        $this->google->setRedirectUri(APP_PATH.'api/google/oAuth/login');
         //$this->google->setPrompt('select_account consent');
 
 

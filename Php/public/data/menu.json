@@ -2,30 +2,30 @@
   {
     "icon": "mdi-calendar",
     "text": "Home",
-    "url": "/"
+    "url": "./"
   },
   {
     "icon": "mdi-cash-usd-outline",
     "text": "Expense",
     "url": "",
     "children": [
-      { "text": "Add Record", "url": "expense" },
-      { "text": "Report", "url": "report" }
+      { "text": "Add Record", "url": "./expense" },
+      { "text": "Report", "url": "./report" }
     ]
   },
   {
     "icon": "mdi-border-color",
     "text": "Todo",
-    "url": "/todo"
+    "url": "./todo"
   },
   {
     "icon": "mdi-view-agenda",
     "text": "Schedule",
-    "url": "/schedule"
+    "url": "./schedule"
   },
   {
     "icon": "mdi-calculator",
     "text": "Calculator",
-    "url": "/calculator"
+    "url": "./calculator"
   }
 ]

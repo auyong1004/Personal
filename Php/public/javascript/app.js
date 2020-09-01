@@ -104,7 +104,7 @@ var appMixin = {
                 name: 'Vue Application',
             },
 
-            production: false,
+            production: !(window.location.hostname=='localhost'),
         }
     },
     computed: {
@@ -119,7 +119,6 @@ var appMixin = {
 
     },
     async created() {
-
 
     },
 

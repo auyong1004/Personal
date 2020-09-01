@@ -72,7 +72,8 @@
                     </template>
                 </v-list>
                 <template v-slot:append>
-                    <v-btn v-if="profile.isAuthed" class="text-center" style="width: 100%;" text @click="onLogout">Logout</v-btn>
+                    <v-btn v-if="profile.isAuthed" class="text-center" style="width: 100%;" text @click="onLogout">
+                        Logout</v-btn>
                 </template>
             </v-navigation-drawer>
 
@@ -150,7 +151,7 @@
                                         <v-date-picker v-model="expenseForm.receiptDate" no-title scrollable>
                                             <v-spacer></v-spacer>
                                             <v-btn text color="primary" @click="menu = false">Cancel</v-btn>
-                                            <v-btn text color="primary"
+                                            <v-btn text color="prfimary"
                                                 @click="$refs.menu.save(expenseForm.receiptDate)">OK</v-btn>
                                         </v-date-picker>
                                     </v-menu>
@@ -408,15 +409,15 @@
 
         },
         computed: {
-            enableForm:{
-                cache:false,
-                get:function(){
+            enableForm: {
+                cache: false,
+                get: function () {
 
-                    if(this.expenseForm.session.length==0)return false;
-                    if(this.expenseForm.amount.length==0)return false;
-                    if(this.expenseForm.paymentType.length==0)return false;
-                    if(this.expenseForm.expenseType.length==0)return false;
-                    if(this.expenseForm.receiptDate.length==0)return false;
+                    if (this.expenseForm.session.length == 0) return false;
+                    if (this.expenseForm.amount.length == 0) return false;
+                    if (this.expenseForm.paymentType.length == 0) return false;
+                    if (this.expenseForm.expenseType.length == 0) return false;
+                    if (this.expenseForm.receiptDate.length == 0) return false;
                     return true;
                 }
             },
@@ -468,8 +469,11 @@
 
                 // Items have already been requested
                 if (this.remarksLoaded) return
-
-
+                if (val == undefined) return;
+                if (val.length <= 2) {
+                    this.remarks =[...val];
+                    return;
+                }
                 let config = {
                     url: `${this.getEndPoint('option')}/remark?remark=${val}`,
                     method: 'get',
@@ -483,7 +487,10 @@
                 }
                 this.remarksLoaded = true
                 this.$http.request(config).then((resp) => {
-                    this.remarks = resp.data;
+                    let result=[... resp.data];
+                    result.push(val);
+
+                    this.remarks =result;
                     this.remarksLoaded = false
 
                 })
@@ -609,7 +616,7 @@
                 })
 
                 config = {
-                    url: `${this.getEndPoint('expense')}${this.expenseForm.mode == 'post' ? '' : "/" + expense.id}`,
+                    url: `${this.getEndPoint('expense')}${this.expenseForm.mode == 'post' ? '' : "/" + this.expenseForm.id}`,
                     method: this.expenseForm.mode,
                     withCredentials: true,
                     headers: {
@@ -620,6 +627,7 @@
 
                 this.$http.request(config).then((resp) => {
                     if (this.expenseForm.mode == 'post') {
+                        expense.id = resp.data.id;
                         this.expenses.push(expense);
                     } else {
                         this.expenses[this.expenses.indexOf(this.expenseForm.selected)] = expense;
@@ -636,6 +644,7 @@
                     display: false,
                     selected: null,
                     mode: 'post',
+                    id: '',
                     session: '',
                     amount: '',
                     paymentType: '',

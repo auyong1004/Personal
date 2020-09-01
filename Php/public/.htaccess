@@ -4,10 +4,10 @@
   #Header set Access-Control-Allow-Origin https://edocs.redtone.com
   
   # Multiple subDomain
-  SetEnvIf Origin ^(https?://.+\.redtone\.com(?::\d{1,5})?)$   CORS_ALLOW_ORIGIN=$1
-  Header set Access-Control-Allow-Origin  %{CORS_ALLOW_ORIGIN}e   env=CORS_ALLOW_ORIGIN
-  Header set Access-Control-Allow-Credentials true
-  Header add Access-Control-Allow-Headers "Access-Control-Allow-Origin,X-Requested-With, Content-Type, Accept, Origin, Authorization,Json-Token"
+  #SetEnvIf Origin ^(https?://.+\.redtone\.com(?::\d{1,5})?)$   CORS_ALLOW_ORIGIN=$1
+  #Header set Access-Control-Allow-Origin  %{CORS_ALLOW_ORIGIN}e   env=CORS_ALLOW_ORIGIN
+  #Header set Access-Control-Allow-Credentials true
+  #Header add Access-Control-Allow-Headers "Access-Control-Allow-Origin,X-Requested-With, Content-Type, Accept, Origin, Authorization,Json-Token"
 
   #Header merge  Vary "Origin"
 
@@ -36,6 +36,7 @@
 
   RewriteCond %{REQUEST_FILENAME} !-f
   # need to change on production
+  #RewriteRule ^ /personal/public/index.php [QSA,L]
   RewriteRule ^ /index.php [QSA,L]
 
 </IfModule>

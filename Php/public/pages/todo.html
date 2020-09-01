@@ -614,18 +614,22 @@
             },
             createForm() {
                 if (this.task.length <= 2) return;
-                let task = {
+                let list, task, config, props = ['selected', 'mode', 'display'];
+
+
+                task = {
                     id: '',
                     subject: this.task,
                     description: '-',
                     dueDate: new Date().toISOString().substr(0, 10),
-                    list: this.taskList,
+                    list: 1,
                     createDate: '',
                     priority: '1',
                     stat: false,
                 }
+                list = this.taskLists.find((taskList) => taskList.id == task.list);
 
-                let config = {
+                config = {
                     url: `${this.getEndPoint('task')}`,
                     method: 'post',
                     withCredentials: true,
@@ -635,7 +639,9 @@
                     data: task
                 }
                 this.$http.request(config).then((resp) => {
-                    task.id = resp.data;
+                    task.listColor = list.color;
+                    task.listName = list.name;
+                    task.id = resp.data.id;
                     this.tasks.push(task);
                     this.infoBar.display = true;
                     this.infoBar.title = 'Add Success'
@@ -675,7 +681,7 @@
 
             },
             saveForm() {
-                let list, task, props = ['selected', 'mode', 'display'];
+                let list, config, task, props = ['selected', 'mode', 'display'];
                 task = Object.assign({}, this.taskForm);
                 props.forEach((prop) => {
                     delete task[prop];

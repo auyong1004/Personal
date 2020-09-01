@@ -71,6 +71,8 @@ class TaskController extends Controller
         ];
         foreach ($form as $formProp => $formValue) {
             if(isset($post[$formProp]))$form[$formProp]=$post[$formProp];
+            if(is_bool ($form[$formProp]))$form[$formProp]= ($form[$formProp])?'1':'0';
+
         }
         
         $sql="INSERT INTO `p_task` (`t_id`, `t_subject`, `t_description`, `t_priority`, `t_create_date`, `t_due_date`, `t_stat`,`tk_id`) 
@@ -112,6 +114,8 @@ class TaskController extends Controller
 
         foreach ($form as $formProp => $formValue) {
             if(isset($post[$formProp]))$form[$formProp]=$post[$formProp];
+            if(is_bool ($form[$formProp]))$form[$formProp]= ($form[$formProp])?'1':'0';
+
         }
 
         $sql="UPDATE `p_task` SET

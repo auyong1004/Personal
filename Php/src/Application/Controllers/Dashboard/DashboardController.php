@@ -60,6 +60,8 @@ class DashboardController extends Controller
             'events'=>$this->mysqlService->queryOps($eventSql),
         ];
 
+        if(is_null($result['expense']))$result['expense']=0;
+
         $payload = new ControllerPayload(200, $result);
 
         return $this->respondJSON($response,$payload);    

@@ -386,7 +386,7 @@
             },
             colors: ['blue', 'indigo', 'deep-purple', 'cyan', 'green', 'orange', 'grey darken-1'],
             names: ['Meeting', 'Holiday', 'PTO', 'Travel', 'Event', 'Birthday', 'Conference', 'Party'],
-            scheduleLoaded:false,
+            scheduleLoaded: false,
             pagination: {
                 year: `${new Date().getFullYear()}`,
                 month: new Date().getMonth() + 1,
@@ -518,7 +518,7 @@
 
                     });
                 })
-                this.scheduleLoaded=true;
+                this.scheduleLoaded = true;
             },
             async initial() {
             },
@@ -635,10 +635,10 @@
                 }
             },
             googleLogin() {
-                window.location = '/api/google/oAuth/login';
+                window.location = './api/google/oAuth/login';
             }
         },
-
+ 
 
 
 

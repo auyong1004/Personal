@@ -35,7 +35,7 @@ return function (ContainerBuilder $containerBuilder) {
         'db1'=>[
             'host'=>'localhost',
             'username'=>'developer',
-            'password'=>'12345678',
+            'password'=>'alex1234',
             'database'=>'personal'
         ],
 
