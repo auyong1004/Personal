@@ -1,0 +1,16 @@
+.todo-form-container{
+    .todo-form-spacer {
+        flex: 1 1 auto;
+      }
+    .todo-form-content{
+        padding-top:20px;
+        padding-left:60px;
+        padding-right:60px;
+        mat-form-field{
+            width:100%;
+        }
+        mat-radio-button{
+            padding-right:6px;
+        } 
+    }  
+}   

@@ -1,0 +1,46 @@
+<div class="personal-container" [class.personal-is-mobile]="mobileQuery.matches">
+    <mat-toolbar color="primary" class="personal-toolbar">
+        <button mat-icon-button (click)="drawer.toggle()">
+            <mat-icon>menu</mat-icon>
+        </button>
+        <h1 class="personal-app-name">Personal</h1>
+    </mat-toolbar>
+
+
+    <mat-drawer-container class="personal-drawer-container" autosize>
+
+
+        <mat-drawer #drawer opened class="personal-drawer" mode="side">
+            <mat-nav-list class="personal-drawer-nav">
+
+                <div *ngFor="let menu of menus">
+
+                    <a mat-list-item [routerLink]="menu.url" class="personal-drawer-menu">
+                        <mat-icon matListIcon>{{menu.icon}}</mat-icon>
+                        <span>
+                            {{menu.text}}
+
+                        </span>
+                    </a>
+                    <mat-divider></mat-divider>
+
+                </div>
+
+            </mat-nav-list>
+        </mat-drawer>
+
+
+        <div class="personal-sidenav-content">
+
+            <router-outlet></router-outlet>
+        </div>
+
+    </mat-drawer-container>
+
+</div>
+
+
+
+<!-- Copyright 2020 Google LLC. All Rights Reserved.
+      Use of this source code is governed by an MIT-style license that
+      can be found in the LICENSE file at http://angular.io/license -->

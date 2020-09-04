@@ -1,0 +1,106 @@
+<div class="todo-container">
+
+  <mat-tab-group class="elevation-0" (selectedIndexChange)="onTab($event)">
+    <mat-tab *ngFor="let list of taskLists; let i = index" class="todo-tab">
+
+      <ng-template mat-tab-label>
+
+        {{list.name}}
+
+        <!--
+        <mat-icon *ngIf="i>0" class="todo-tab-icon">delete</mat-icon>
+
+        -->
+
+      </ng-template>
+    </mat-tab>
+    <!--
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-form-field floatLabel="never" appearance="none">
+          <input matInput placeholder="What are you working on?">
+        </mat-form-field>
+
+      </ng-template>
+
+
+
+    </mat-tab>
+    -->
+
+
+  </mat-tab-group>
+
+  <div class="todo-input" [class.mat-elevation-z4]="true">
+    <mat-form-field  floatLabel="never" (keydown.enter)="createTask()">
+      <input matInput [formControl]="taskForm" placeholder="What are you working on?">
+    </mat-form-field>
+  </div>
+
+  <div>
+    <div class="mat-display-3 todo-title">
+      Task: 2
+
+    </div>
+    <mat-divider></mat-divider>
+
+    <div class="todo-description">
+      <div fxLayout="row" fxLayoutAlign="start start">
+
+        <div>
+          Remaining: {{remaining}}
+
+        </div>
+        <div>
+          Completed: {{completed}}
+
+        </div>
+      </div>
+
+
+    </div>
+  </div>
+
+  <!---->
+  <mat-card>
+    <mat-selection-list #tasklist>
+      <mat-list-item *ngFor="let task of tasks">
+        <mat-icon class="todo-stat" matListIcon matRipple (click)="statTask(task)">
+
+          {{ task.stat?'check_circle':'check_circle_outline'}}</mat-icon>
+          
+
+        <h3 matLine> {{task.subject}} </h3>
+        <p matLine> {{task.description}} </p>
+        <p matLine class="demo-2"> {{task.dueDate}} </p>
+        <div *ngIf="task.stat==true">
+
+          <button mat-icon-button (click)="editTask(task)">
+            <mat-icon>edit</mat-icon>
+
+          </button>
+
+          <button mat-icon-button (click)="deleteTask(task)">
+            <mat-icon class="mat-24">delete</mat-icon>
+
+          </button>
+        </div>
+        <div *ngIf="!task.stat">
+          <mat-icon>
+            done
+          </mat-icon>
+        </div>
+
+
+
+      </mat-list-item>
+    </mat-selection-list>
+
+  </mat-card>
+
+
+  <button mat-fab color="primary" class="todo-add" (click)="addTask()">
+    <mat-icon>add</mat-icon>
+  </button>
+</div>

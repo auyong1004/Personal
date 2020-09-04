@@ -1,0 +1,29 @@
+.dashboard-container {
+  margin-top: 10px;
+
+  .dashboard-card {
+    min-width: 400px;
+    max-width:500px;
+    margin-left:2px;
+    margin-right:2px;
+
+  }
+
+  .dashboard-card-actions {
+    //flex: 1 1 auto;
+    text-align: right;
+
+  }
+
+  .dashboard-card-content {
+    .symbol {
+      font-size: 3rem !important;
+      font-weight: 400;
+      padding-left:10px;
+    }
+  }
+
+
+
+
+}
